@@ -32,18 +32,21 @@ namespace GitLabApiClient.Internal.Http
         public GitLabHttpFacade(string hostUrl, RequestsJsonSerializer jsonSerializer, string authenticationToken = "", HttpMessageHandler httpMessageHandler = null, TimeSpan? clientTimeout = null) :
             this(hostUrl, jsonSerializer, httpMessageHandler, clientTimeout)
         {
-            switch (authenticationToken.Length)
+            if (authenticationToken.Length == 0)
             {
-                case 0:
-                    break;
-                case 20:
-                    _httpClient.DefaultRequestHeaders.Add(PrivateToken, authenticationToken);
-                    break;
-                case 64:
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationToken);
-                    break;
-                default:
-                    throw new ArgumentException("Unsupported authentication token provide, please private an oauth or private token");
+                return;
+            }
+            else if (20 <= authenticationToken.Length && authenticationToken.Length < 64)
+            {
+                _httpClient.DefaultRequestHeaders.Add(PrivateToken, authenticationToken);
+            }
+            else if (authenticationToken.Length == 64)
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationToken);
+            }
+            else
+            {
+                throw new ArgumentException("Unsupported authentication token provide, please private an oauth or private token");
             }
         }
 
